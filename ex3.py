@@ -1,11 +1,13 @@
+import math
 import os
-import random
 import sys
 
 from django.conf import settings
 from django.core.wsgi import get_wsgi_application
+from django.http import HttpResponse
 from django.urls import path
 from django.utils.crypto import get_random_string
+from django.views.decorators.http import require_GET
 
 # Configure Django
 
@@ -40,49 +42,54 @@ from rest_framework.response import Response  # noqa: E402
 # Our view functions
 
 
+@require_GET
+def index_view(request):
+    return HttpResponse(
+        "<h1>Welcome to Our Example</h1>"
+        + '<p>See <a href="/api/">/api/</a> for the API.</p>'
+    )
+
+
 @api_view()
-def index(request):
+def api_index_view(request):
     return Response(
         data={
             "endpoints": [
-                "/api/predict-rain/",
+                "/api/circle-area/",
             ],
         },
     )
 
 
-class PredictRainInputSerializer(serializers.Serializer):
-    temperature = serializers.FloatField(
-        label="Temperature (Celsius)",
-        min_value=-40.0,
-        max_value=120.0,
+class CircleInputSerializer(serializers.Serializer):
+    radius = serializers.FloatField(
+        min_value=1e-9,
+        max_value=1e9,
     )
 
 
 @api_view()
-def predict_rain(request):
-    serializer = PredictRainInputSerializer(data=request.GET)
+def circle_area_view(request):
+    serializer = CircleInputSerializer(data=request.GET)
     serializer.is_valid(raise_exception=True)
-    temperature = serializer.validated_data["temperature"]
+    radius = serializer.validated_data["radius"]
 
-    rain_probability = sophisticated_model_to_predict_rain(temperature)
+    area = calculate_circle_area(radius)
 
-    return Response(data={"rain_probability": rain_probability})
+    return Response(data={"area": area})
 
 
-def sophisticated_model_to_predict_rain(temperature):
-    # TODO: sophistication
-    if temperature < 1.0:
-        return 0
-    return random.random()
+def calculate_circle_area(radius):
+    return math.pi * (radius ** 2)
 
 
 # Our URL configuration
 
 
 urlpatterns = [
-    path("", index),
-    path("api/predict-rain/", predict_rain),
+    path("", index_view),
+    path("api/", api_index_view),
+    path("api/circle-area/", circle_area_view),
 ]
 
 # Create a WSGI application so a web server could run this for us:

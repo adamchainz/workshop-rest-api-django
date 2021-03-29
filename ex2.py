@@ -1,11 +1,11 @@
+import math
 import os
-import random
 import sys
 from http import HTTPStatus
 
 from django.conf import settings
 from django.core.wsgi import get_wsgi_application
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.urls import path
 from django.utils.crypto import get_random_string
 from django.views.decorators.http import require_GET
@@ -28,29 +28,32 @@ settings.configure(
 
 
 @require_GET
-def index(request):
+def index_view(request):
+    return HttpResponse(
+        "<h1>Welcome to Our Example</h1>"
+        + '<p>See <a href="/api/">/api/</a> for the API.</p>'
+    )
+
+
+@require_GET
+def api_index_view(request):
     return JsonResponse(
         data={
             "endpoints": [
-                "/api/predict-rain/",
+                "/api/circle-area/",
             ],
         },
     )
 
 
 @require_GET
-def predict_rain(request):
+def circle_area_view(request):
     errors = []
+
     try:
-        # In celsius
-        temperature = request.GET["temperature"]
-    except KeyError:
-        errors.append("Query parameter 'temperature' must be provided.")
-    else:
-        try:
-            temperature = float(temperature)
-        except ValueError:
-            errors.append("Query parameter 'temperature' must be a valid number.")
+        radius = float(request.GET["radius"])
+    except (KeyError, ValueError):
+        errors.append("Query parameter 'radius' must be provided as a number.")
 
     if errors:
         return JsonResponse(
@@ -58,24 +61,22 @@ def predict_rain(request):
             data={"errors": errors},
         )
 
-    rain_probability = sophisticated_model_to_predict_rain(temperature)
+    area = calculate_circle_area(radius)
 
-    return JsonResponse(data={"rain_probability": rain_probability})
+    return JsonResponse(data={"area": area})
 
 
-def sophisticated_model_to_predict_rain(temperature):
-    # TODO: sophistication
-    if temperature < 1.0:
-        return 0
-    return random.random()
+def calculate_circle_area(radius):
+    return math.pi * (radius ** 2)
 
 
 # Our URL configuration
 
 
 urlpatterns = [
-    path("", index),
-    path("api/predict-rain/", predict_rain),
+    path("", index_view),
+    path("api/", api_index_view),
+    path("api/circle-area/", circle_area_view),
 ]
 
 # Create a WSGI application so a web server could run this for us:
