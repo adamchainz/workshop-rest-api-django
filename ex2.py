@@ -30,7 +30,7 @@ settings.configure(
 @require_GET
 def index_view(request):
     return HttpResponse(
-        "<h1>Welcome to Our Example</h1>"
+        "<h1>Welcome to Example Corp</h1>"
         + '<p>See <a href="/api/">/api/</a> for the API.</p>'
     )
 
