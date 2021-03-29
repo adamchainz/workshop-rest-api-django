@@ -12,8 +12,6 @@ from django.utils.crypto import get_random_string
 settings.configure(
     # Use Django's debug mode when the environment asks for it:
     DEBUG=(os.environ.get("DEBUG", "") == "1"),
-    # Disable security feature - host header validation:
-    ALLOWED_HOSTS=["*"],
     # Tell Django to read URL's from this module:
     ROOT_URLCONF=__name__,
     # We aren't using any security features but Django requires this setting:
