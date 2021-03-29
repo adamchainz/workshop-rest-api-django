@@ -22,19 +22,32 @@ settings.configure(
 )
 
 
-# Our view function
+# Our view functions
 
 
 @require_GET
-def index(request):
-    return HttpResponse("<h1>Hello World from Django!</h1>")
+def index_view(request):
+    return HttpResponse(
+        "<h1>Hello World from Django!</h1>"
+        + '<p><a href="/about/">About this site</a></p>'
+    )
+
+
+@require_GET
+def about_view(request):
+    return HttpResponse(
+        "<h1>About</h1>"
+        + "<p>This site was built by __ using Django.</p>"
+        + '<p><a href="/">Home</a></p>'
+    )
 
 
 # Our URL configuration
 
 
 urlpatterns = [
-    path("", index),
+    path("", index_view),
+    path("about/", about_view),
 ]
 
 # Create a WSGI application so a web server could run this for us:
